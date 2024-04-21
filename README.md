@@ -9,7 +9,7 @@ USE taller3
 
 **DER**
 
-![](\Taller3\DER_Taller3.png)
+![image](DER_Taller3.png)
 
 **Creación de las tablas**
 
