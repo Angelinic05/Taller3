@@ -11,6 +11,8 @@ USE taller3
 
 ![](C:\Users\57322\OneDrive\Documentos\Campuslands\BD\Taller3\DER_Taller3.png)
 
+![DER_Taller3](C:\Users\57322\OneDrive\Documentos\Campuslands\BD\Taller3\DER_Taller3.png)
+
 **Creación de las tablas**
 
 ```mysql
