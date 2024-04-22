@@ -459,10 +459,11 @@ WHERE puesto != 'Representante de Ventas';
 **6. Devuelve un listado con el nombre de los todos los clientes españoles.**
 
 ```mysql
-SELECT nombre
+SELECT c.nombre
 FROM cliente c
 JOIN ciudad ci ON c.codigo_ciudad = ci.codigo
-JOIN pais p ON ci.codigo_pais = p.codigo
+JOIN region r ON ci.codigo_region=r.codigo
+JOIN pais p ON r.codigo_pais = p.codigo
 WHERE p.nombre = 'España';
 ```
 
@@ -535,7 +536,7 @@ WHERE fecha_entrega < fecha_esperada - INTERVAL 2 DAY;
 **11. Devuelve un listado de todos los pedidos que fueron rechazados en 2009.**
 
 ```mysql
-SELECT *
+SELECT codigo, fecha_pedido, fecha_esperada, fecha_entrega, estado, cedula_cliente, comentarios
 FROM pedido
 WHERE estado = 'Rechazado' AND YEAR(fecha_pedido) = 2009;
 ```
@@ -544,7 +545,7 @@ WHERE estado = 'Rechazado' AND YEAR(fecha_pedido) = 2009;
 **mes de enero de cualquier año.**
 
 ```mysql
-SELECT *
+SELECT codigo, fecha_pedido, fecha_esperada, fecha_entrega, estado, cedula_cliente, comentarios
 FROM pedido
 WHERE MONTH(fecha_entrega) = 1;
 ```
@@ -573,7 +574,7 @@ FROM pago;
 **los de mayor precio.**
 
 ```mysql
-SELECT p.*
+SELECT p.codigo, p.nombre, p.descripcion, p.precio_venta, p.id_gama, p.id_dimension, p.nit_proveedor
 FROM producto p
 JOIN gama_producto gp ON p.id_gama = gp.id
 JOIN inventario i ON p.codigo = i.codigo_producto
@@ -584,7 +585,7 @@ ORDER BY p.precio_venta DESC;
 **16. Devuelve un listado con todos los clientes que sean de la ciudad de Madrid y cuyo representante de ventas tenga el código de empleado 11 o 30.**
 
 ```mysql
-SELECT c.*
+SELECT c.cedula, c.nombre, c.linea_direccion1, c.linea_direccion2, c.codigo_postal, c.limite_credito, c.cedula_empleado, c.codigo_ciudad 
 FROM cliente c
 JOIN ciudad ci ON c.codigo_ciudad = ci.codigo
 JOIN empleado e ON c.cedula_empleado = e.cedula
@@ -778,7 +779,7 @@ INNER JOIN gama_producto ON producto.id_gama = gama_producto.id;
 realizado ningún pago.**
 
 ```mysql
-SELECT c.*
+SELECT c.cedula, c.nombre, c.linea_direccion1, c.linea_direccion2, c.codigo_postal, c.limite_credito, c.cedula_empleado, c.codigo_ciudad 
 FROM cliente c
 LEFT JOIN pago p ON c.cedula = p.cedula_cliente
 WHERE p.id IS NULL;
@@ -788,7 +789,7 @@ WHERE p.id IS NULL;
 realizado ningún pedido.**
 
 ```mysql
-SELECT c.*
+SELECT c.cedula, c.nombre, c.linea_direccion1, c.linea_direccion2, c.codigo_postal, c.limite_credito, c.cedula_empleado, c.codigo_ciudad 
 FROM cliente c
 LEFT JOIN pedido pe ON c.cedula = pe.cedula_cliente
 WHERE pe.codigo IS NULL;
@@ -797,7 +798,7 @@ WHERE pe.codigo IS NULL;
 **3. Devuelve un listado que muestre los clientes que no han realizado ningún pago y los que no han realizado ningún pedido.**
 
 ```mysql
-SELECT c.*
+SELECT c.cedula, c.nombre, c.linea_direccion1, c.linea_direccion2, c.codigo_postal, c.limite_credito, c.cedula_empleado, c.codigo_ciudad 
 FROM cliente c
 LEFT JOIN pago p ON c.cedula = p.cedula_cliente
 LEFT JOIN pedido pe ON c.cedula = pe.cedula_cliente
@@ -807,7 +808,7 @@ WHERE p.id IS NULL AND pe.codigo IS NULL;
 **4. Devuelve un listado que muestre solamente los empleados que no tienen una oficina asociada.**
 
 ```mysql
-SELECT e.*
+SELECT e.cedula, e.nombre, e.apellido1, e.apellido2, e.extension, e.puesto, e.codigo_oficina, e.jefe, e.email
 FROM empleado e
 LEFT JOIN oficina o ON e.codigo_oficina = o.codigo
 WHERE o.codigo IS NULL;
@@ -816,7 +817,7 @@ WHERE o.codigo IS NULL;
 **5. Devuelve un listado que muestre solamente los empleados que no tienen un cliente asociado.**
 
 ```mysql
-SELECT e.*
+SELECT e.cedula, e.nombre, e.apellido1, e.apellido2, e.extension, e.puesto, e.codigo_oficina, e.jefe, e.email
 FROM empleado e
 LEFT JOIN cliente c ON e.cedula = c.cedula_empleado
 WHERE c.cedula IS NULL;
@@ -825,7 +826,7 @@ WHERE c.cedula IS NULL;
 **6. Devuelve un listado que muestre solamente los empleados que no tienen un cliente asociado junto con los datos de la oficina donde trabajan..**
 
 ```mysql
-SELECT e.*, o.*
+SELECT e.cedula, CONCAT(e.nombre,' ',e.apellido1,' ',e.apellido2) AS 'Nombre Completo', o.codigo, o.codigo_postal, o.linea_direccion1, o.linea_direccion2, o.codigo_ciudad
 FROM empleado e
 LEFT JOIN cliente c ON e.cedula = c.cedula_empleado
 JOIN oficina o ON e.codigo_oficina = o.codigo
@@ -835,7 +836,7 @@ WHERE c.cedula IS NULL;
 **7. Devuelve un listado que muestre los empleados que no tienen una oficina asociada y los que no tienen un cliente asociado.**
 
 ```mysql
-SELECT e.*
+SELECT e.cedula, CONCAT(e.nombre,' ',e.apellido1,' ',e.apellido2) AS 'Nombre Completo'
 FROM empleado e
 LEFT JOIN oficina o ON e.codigo_oficina = o.codigo
 LEFT JOIN cliente c ON e.cedula = c.cedula_empleado
@@ -846,7 +847,7 @@ WHERE o.codigo IS NULL OR c.cedula IS NULL;
 pedido.**
 
 ```mysql
-SELECT p.*
+SELECT p.codigo, p.nombre, p.descripcion, p.precio_venta
 FROM producto p
 LEFT JOIN detalle_pedido dp ON p.codigo = dp.codigo_producto
 WHERE dp.codigo_pedido IS NULL;
@@ -866,7 +867,7 @@ WHERE dp.codigo_pedido IS NULL;
 **10. Devuelve las oficinas donde no trabajan ninguno de los empleados que hayan sido los representantes de ventas de algún cliente que haya realizado la compra de algún producto de la gama Frutales.**
 
 ```mysql
-SELECT o.*
+SELECT o.codigo, o.codigo_postal, o.linea_direccion1, o.linea_direccion2, o.codigo_ciudad
 FROM oficina o
 LEFT JOIN empleado e ON o.codigo = e.codigo_oficina
 WHERE e.cedula IS NULL;
@@ -875,7 +876,7 @@ WHERE e.cedula IS NULL;
 **11. Devuelve un listado con los clientes que han realizado algún pedido pero no han realizado ningún pago.**
 
 ```mysql
-SELECT c.*
+SELECT c.cedula, c.nombre, c.linea_direccion1, c.linea_direccion2, c.codigo_postal, c.limite_credito, c.cedula_empleado, c.codigo_ciudad
 FROM cliente c
 LEFT JOIN pedido pe ON c.cedula = pe.cedula_cliente
 LEFT JOIN pago p ON c.cedula = p.cedula_cliente
@@ -885,7 +886,7 @@ WHERE pe.codigo IS NOT NULL AND p.id IS NULL;
 **12. Devuelve un listado con los datos de los empleados que no tienen clientes asociados y el nombre de su jefe asociado.**
 
 ```mysql
-SELECT e.*, ej.nombre AS nombre_jefe, ej.apellido1 AS apellido1_jefe
+SELECT e.cedula, CONCAT(e.nombre,' ',e.apellido1,' ',e.apellido2) AS 'Nombre Completo', ej.nombre AS nombre_jefe, ej.apellido1 AS apellido1_jefe
 FROM empleado e
 LEFT JOIN empleado ej ON e.jefe = ej.cedula
 LEFT JOIN cliente c ON e.cedula = c.cedula_empleado
